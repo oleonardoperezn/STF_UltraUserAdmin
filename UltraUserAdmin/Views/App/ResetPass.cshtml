@@ -1,0 +1,189 @@
+﻿
+@{
+    ViewBag.Title = "ResetPass";
+}
+
+<script>
+
+    $(document).ready(function (){
+        //START DOCUMENT
+
+    }); //END DOCUMENT
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    //FUNCIONES
+
+    function ValidateUser()
+    {
+        var valappnm = "@ViewBag.Appnm";
+        var valuser = $("#txt_user").val();
+        $("#txt_user").prop("readonly", true);
+        $("#alert_user").addClass("d-none");
+        $("#alert_okuser").addClass("d-none");
+        $("#div_spinvaluser").removeClass("d-none");
+        $("#btn_valuser").addClass("d-none");
+        $("#alert_erroruser").addClass("d-none");
+        $("#txt_user").removeClass("is-invalid");
+
+        if (valuser.length>0) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ValidateUserMail", "App")',
+                dataType: 'json',
+                data: {
+                    appnm: valappnm,
+                    user: valuser
+                },
+                success: function (result) {
+                    console.log(result);
+
+                    $("#div_spinvaluser").addClass("d-none");
+                    $("#btn_valuser").removeClass("d-none");
+                    
+                    $("#b_mailuser").text(result.Mail);
+
+                    if (result.Status == "0" || result.Status == null || result.Status == "Usuario no encontrado")
+                    {
+                        $("#btn_valuser").removeClass("d-none");
+                        $("#alert_erroruser").removeClass("d-none");
+                        $("#div_cardinfouser").addClass("d-none");
+                        $("#txt_user").prop("readonly", false);
+                    }
+
+                    if (result.Mail != null && result.Mail.length>0)
+                    {
+                        $("#div_cardinfouser").removeClass("d-none");
+                        $("#alert_okuser").removeClass("d-none");
+                        $("#btn_valuser").addClass("d-none");                        
+                    }
+
+                }
+            });
+        } else {
+            $("#txt_user").addClass("is-invalid");
+            $("#alert_user").removeClass("d-none");
+            $("#div_spinvaluser").addClass("d-none");
+            $("#btn_valuser").removeClass("d-none");
+        }
+    }
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    function GeneratePass()
+    {
+        var valappnm = "@ViewBag.Appnm";
+        var valuser = $("#txt_user").val();
+        var valmail = $("#b_mailuser").text();
+
+        $("#btn_genpass").addClass("d-none");
+        $("#alert_errorgenpass").addClass("d-none");
+        $("#div_spingenpass").removeClass("d-none");
+        
+        if (valuser != "" && valmail != "")
+        {
+            $.ajax({
+            type: 'POST',
+            url: '@Url.Action("GeneratePassSendMail", "App")',
+            dataType: 'json',
+            data: {
+                appnm: valappnm,
+                user: valuser,
+                mail: valmail
+            },
+            success: function (result) {
+                //console.log(result);
+
+                $("#div_spingenpass").addClass("d-none");
+
+                if (result.Status == "1") {
+                    $("#btn_genpass").addClass("d-none");
+                    $("#alert_okgenpass").removeClass("d-none");
+                }
+
+                if (result.Status == "0") {
+                    $("#btn_genpass").removeClass("d-none");
+                    $("#alert_errorgenpass").removeClass("d-none");
+                }
+            }
+            });
+        }
+    }
+</script>
+
+<div class="container">
+    @if (!string.IsNullOrEmpty(ViewBag.Appnm))
+    {
+    <div class="row justify-content-center mt-1">
+        <div class="col-md-8">
+            <h4 class="text-center">Reset Password</h4>
+            @*<img src="assets/logoang.png" alt="Logo de la Empresa" class="img-fluid mx-auto d-block mb-1"
+                style="max-width: 120px;">*@
+            <div class="card">
+                <div class="card-body">
+                    <label for="lbl_User" class="form-label fw-bold">Usuario:</label>
+                    @Html.TextBox("txt_user", "", new { @class = "form-control form-control-sm w-100", placeholder = "Ingresar Usuario" })
+                    <div id="alert_user" class="alert alert-danger d-none">
+                        ¡El usuario es obligatorio!
+                    </div>
+                    <div id="div_spinvaluser" class="spinner-border text-primary float-end d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>     
+                    <div id="alert_okuser" class="alert alert-info d-none" role="alert">
+                        La información del usuario se ha encontrado exitosamente.
+                    </div>
+                    <div id="alert_erroruser" class="alert alert-danger d-none">
+                        ¡Error al validar usuario intente de nuevo!
+                    </div>
+                    <button id="btn_valuser" type="button" class="btn btn-primary btn-sm mt-2 float-end" onclick="ValidateUser();">
+                        Validar Usuario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-8">
+
+            <div id="div_cardinfouser" class="card d-none">
+                <div class="card-body">
+                    <h5 class="card-title text-center">¡Información!</h5>
+                    <br>
+                    <p class="card-text">
+                        El usuario buscado esta asignado al correo: <b id="b_mailuser"></b>
+                        y se enviará el nuevo password a esta dirección de correo.
+                    </p>
+
+                    <h6>Si es correcto por favor da click en el botón de <b>"Reset Password"</b> para completar el proceso.</h6>
+                    <br>
+                    <p>
+                        De lo contrario, si el correo no es correcto favor de contactar al área de desarrollo para actualizar
+                        la información y poder completar el proceso.
+                    </p>
+
+                    <div id="div_spingenpass" class="spinner-border text-primary float-end d-none" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+
+                    <div id="alert_okgenpass" class="alert alert-success d-none">
+                        ¡Solicitud procesada con éxito!
+                        <br />
+                        Las credenciales de la contraseña se han enviado al correo electrónico.
+                        <br />
+                        Puedes cerrar esta ventana ahora.
+                    </div>
+
+                    <div id="alert_errorgenpass" class="alert alert-danger d-none">
+                        ¡Error al procesar la información! Intente de nuevo.
+                    </div>
+
+                    <button id="btn_genpass" type="button" class="btn btn-primary btn-sm float-end" onclick="GeneratePass()">
+                        <b>Reset Password</b>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+
