@@ -1,3 +1,39 @@
+# Carpeta bin y obj generada por compilación
+bin/
+obj/
+
+# Carpetas generadas por Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de configuración de Rider
+.idea/
+*.sln.iml
+
+# Archivos temporales
+*.log
+*.bak
+*.swp
+*~
+
+# Archivos de caché
+*.dll
+*.exe
+*.pdb
+*.dll
+*.exe
+*.json
+*.zip
+*.csproj.user
+*.cache
+
+# Directorio de paquetes NuGet
+packages/
+
 # Visual Studio / Rider / VS Code
 .vscode/
 .vs/
